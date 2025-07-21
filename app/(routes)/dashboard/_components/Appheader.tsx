@@ -3,9 +3,9 @@ import Link from "next/link";
 import { SignOutButton } from "@/app/_components/Signout-button";
 
 const menuoptions = [
-  { id: 1, name: "Home", path: "/home" },
-  { id: 2, name: "History", path: "/history" },
-  { id: 3, name: "Pricing", path: "/pricing" },
+  { id: 1, name: "Home", path: "/dashboard" },
+  { id: 2, name: "capture", path: "/dashboard/emotiondetector" },
+  { id: 3, name: "aidoctor", path: "/dashboard/aicare" },
   { id: 4, name: "Profile", path: "/profile" },
 ];
 

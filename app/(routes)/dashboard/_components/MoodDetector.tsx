@@ -1,0 +1,135 @@
+"use client"
+
+import React, { useRef, useEffect, useState } from "react"
+import * as faceapi from "face-api.js"
+import { Button } from "@/components/ui/button"
+
+export default function EmotionDetector() {
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const [emotion, setEmotion] = useState<string>("")
+  const [isCaptured, setIsCaptured] = useState<boolean>(false)
+  const [cameraOn, setCameraOn] = useState<boolean>(false)
+
+  useEffect(() => {
+    const loadModels = async () => {
+      const MODEL_URL = "/models"
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      ])
+    }
+
+    loadModels()
+    return () => stopVideo()
+  }, [])
+
+  const startVideo = async (): Promise<void> => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+        setCameraOn(true)
+        setIsCaptured(false)
+        setEmotion("")
+      }
+    } catch (err) {
+      console.error("Error accessing camera:", err)
+    }
+  }
+
+  const stopVideo = (): void => {
+    const stream = videoRef.current?.srcObject as MediaStream | null
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop())
+      if (videoRef.current) videoRef.current.srcObject = null
+    }
+    setCameraOn(false)
+    setIsCaptured(false)
+    setEmotion("")
+  }
+
+  const handleToggleCamera = (): void => {
+    cameraOn ? stopVideo() : startVideo()
+  }
+
+  const handleCapture = async (): Promise<void> => {
+    const video = videoRef.current
+    if (!video) return
+
+    video.pause()
+    setIsCaptured(true)
+
+    const detections = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceExpressions()
+
+    if (detections?.expressions) {
+      const topExpression = Object.entries(detections.expressions).reduce(
+        (a, b) => (a[1] > b[1] ? a : b)
+      )[0]
+      setEmotion(topExpression)
+    } else {
+      setEmotion("No face/emotion detected")
+    }
+  }
+
+  const handleReset = (): void => {
+    setEmotion("")
+    setIsCaptured(false)
+    videoRef.current?.play()
+  }
+
+  return (
+    <div className="flex flex-col items-center mt-8 gap-4">
+      {/* Video + Overlay */}
+      <div className="relative w-[720px] h-[560px]">
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          className="w-full h-full rounded-xl shadow z-10 relative"
+        />
+        {!cameraOn && (
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none flex justify-center items-center bg-white/60 text-black font-semibold text-lg rounded-xl">
+            Camera is OFF
+          </div>
+        )}
+      </div>
+
+      {/* Camera Controls */}
+      <Button onClick={handleToggleCamera}>
+        {cameraOn ? "Turn Off Camera" : "Turn On Camera"}
+      </Button>
+
+      {cameraOn && !isCaptured && (
+        <Button
+          onClick={handleCapture}
+          className="mt-2 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        >
+          Capture Emotion
+        </Button>
+      )}
+
+      {cameraOn && isCaptured && (
+        <Button
+          onClick={handleReset}
+          className="mt-2 bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
+        >
+          Resume Video
+        </Button>
+      )}
+
+      {/* Emotion Output */}
+      {emotion && (
+        <div className="text-xl font-semibold text-purple-700">
+          Detected Emotion: <span className="capitalize">{emotion}</span>
+        </div>
+      )}
+    </div>
+  )
+}
