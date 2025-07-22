@@ -86,7 +86,7 @@ export default function EmotionDetector() {
   return (
     <div className="flex flex-col items-center mt-8 gap-4">
       {/* Video + Overlay */}
-      <div className="relative w-[720px] h-[560px]">
+      <div className="relative w-[520px] h-[360px]">
         <video
           ref={videoRef}
           autoPlay
@@ -102,20 +102,21 @@ export default function EmotionDetector() {
       </div>
 
       {/* Camera Controls */}
-      <Button onClick={handleToggleCamera}>
-        {cameraOn ? "Turn Off Camera" : "Turn On Camera"}
+      <div className="flex flex-row justify-center items-center gap-2">
+            <Button onClick={handleToggleCamera}
+            className="mt-2 bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600">
+        {cameraOn ? "Off Camera" : "On Camera"}
       </Button>
 
       {cameraOn && !isCaptured && (
         <Button
           onClick={handleCapture}
-          className="mt-2 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+          className="mt-2 bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700"
         >
           Capture Emotion
         </Button>
       )}
-
-      {cameraOn && isCaptured && (
+ {cameraOn && isCaptured && (
         <Button
           onClick={handleReset}
           className="mt-2 bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
@@ -124,6 +125,10 @@ export default function EmotionDetector() {
         </Button>
       )}
 
+        
+      </div>
+    
+     
       {/* Emotion Output */}
       {emotion && (
         <div className="text-xl font-semibold text-purple-700">

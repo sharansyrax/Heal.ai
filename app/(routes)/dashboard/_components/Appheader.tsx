@@ -11,7 +11,7 @@ const menuoptions = [
 
 const Appheader = () => {
   return (
-    <div className="flex justify-between items-center p-4 shadow-md bg-white">
+    <div className="flex justify-between items-center p-4 m-4 shadow-md bg-white rounded-full bg-gradient-to-r from-purple-100 to-white-100 ">
       {/* Logo */}
       <div className="flex items-center space-x-2">
         <img src="/logo.png" alt="Heal AI Logo" className="h-[40px] w-[40px]" />

@@ -1,24 +1,23 @@
 'use client'
-import React from 'react'
+
 import { useRouter } from 'next/navigation'
 
 type Props = {
   path: string
+  titles: string
 }
 
-const Nextpage = ({ path }: Props) => {
+const NextPage = ({ path, titles }: Props) => {
   const router = useRouter()
 
   return (
-    <div>
-      <button
-        onClick={() => router.push(path)}
-        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
-      >
-        Check Your Emotions
-      </button>
-    </div>
+    <button
+      onClick={() => router.push(path)}
+      className="text-purple-600 underline-offset-4 text-xl hover:underline hover:font-semibold transition-all duration-200 ease-in-out"
+    >
+      {titles}
+    </button>
   )
 }
 
-export default Nextpage
+export default NextPage
