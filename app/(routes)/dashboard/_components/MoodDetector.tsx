@@ -1,15 +1,24 @@
 "use client"
-
 import React, { useRef, useEffect, useState } from "react"
 import * as faceapi from "face-api.js"
 import { Button } from "@/components/ui/button"
+type Props = {
+  emotion: string;
+  setEmotion: (value: string) => void;
+   isCaptured: boolean;
+  setIsCaptured: (value: boolean) => void;
+    cameraOn: boolean;
+  setCameraOn: (value: boolean) => void;
+  disabled: boolean;
+  setDisabled: (value: boolean) => void;
 
-export default function EmotionDetector() {
+};
+
+
+const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,setCameraOn,disabled,setDisabled}:Props)=> {
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const [emotion, setEmotion] = useState<string>("")
-  const [isCaptured, setIsCaptured] = useState<boolean>(false)
-  const [cameraOn, setCameraOn] = useState<boolean>(false)
-
+ 
+ 
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = "/models"
@@ -56,6 +65,7 @@ export default function EmotionDetector() {
   }
 
   const handleCapture = async (): Promise<void> => {
+    setDisabled(!disabled)
     const video = videoRef.current
     if (!video) return
 
@@ -95,7 +105,7 @@ export default function EmotionDetector() {
           className="w-full h-full rounded-xl shadow z-10 relative"
         />
         {!cameraOn && (
-          <div className="absolute top-0 left-0 w-full h-full pointer-events-none flex justify-center items-center bg-white/60 text-black font-semibold text-lg rounded-xl">
+          <div className="absolute -z-10 top-0 left-0 w-full h-full pointer-events-none flex justify-center items-center bg-white/60 text-black font-semibold text-lg rounded-xl">
             Camera is OFF
           </div>
         )}
@@ -104,8 +114,9 @@ export default function EmotionDetector() {
       {/* Camera Controls */}
       <div className="flex flex-row justify-center items-center gap-2">
             <Button onClick={handleToggleCamera}
+            disabled={disabled}
             className="mt-2 bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600">
-        {cameraOn ? "Off Camera" : "On Camera"}
+        {cameraOn ? "Off Camera" : "Resume"}
       </Button>
 
       {cameraOn && !isCaptured && (
@@ -119,6 +130,7 @@ export default function EmotionDetector() {
  {cameraOn && isCaptured && (
         <Button
           onClick={handleReset}
+          disabled={disabled}
           className="mt-2 bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
         >
           Resume Video
@@ -138,3 +150,12 @@ export default function EmotionDetector() {
     </div>
   )
 }
+function setCameraOn(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}
+
+function setIsCaptured(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}
+
+export default EmotionDetector 
