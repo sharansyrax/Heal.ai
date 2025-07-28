@@ -51,19 +51,19 @@ Based on their emotional state and message, craft a thoughtful and uplifting res
 Make sure the tone is friendly, empathetic, and human-like. Keep the response under 100 words and avoid sounding robotic.
 `;
 
-    const res = await fetch("/api/geminiapi", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ InputPrompt }),
-    });
+     const res = await fetch("/api/geminiapi", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ InputPrompt }),
+  });
+
+  
 
     const data = await res.json();
     setResponse(data.result);
     setLoading(false);
     setSubmitted(true);
 
-
- 
 
     
   };
@@ -77,6 +77,7 @@ Make sure the tone is friendly, empathetic, and human-like. Keep the response un
     setCameraOn(false);
     setSubmitted(false);
     setDisabled(false);
+  
   };
 const savemood=async()=>{
   await fetch("/api/moodsave", {
@@ -87,7 +88,10 @@ const savemood=async()=>{
               thought,
               response: response,
             }),
-          });
+          }
+        );
+        
+
 }
   return (
     <div>

@@ -64,6 +64,7 @@ const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,set
     cameraOn ? stopVideo() : startVideo()
   }
 
+
   const handleCapture = async (): Promise<void> => {
     setDisabled(!disabled)
     const video = videoRef.current
@@ -150,12 +151,6 @@ const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,set
     </div>
   )
 }
-function setCameraOn(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
 
-function setIsCaptured(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
 
 export default EmotionDetector 

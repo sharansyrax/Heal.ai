@@ -1,30 +1,37 @@
-import { GoogleGenerativeAI, GenerationConfig } from "@google/generative-ai";
+// app/api/gemini/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY!,
+  defaultHeaders: {
+    "HTTP-Referer": "https://your-site-url.com", // replace with your actual site
+    "X-Title": "Heal.ai", // replace with your app name
+  },
+});
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const { InputPrompt }: { InputPrompt: string } = await req.json();
 
-    const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+    const completion = await openai.chat.completions.create({
+      model: "google/gemini-2.5-flash-lite",
+      messages: [
+        {
+          role: "user",
+          content: InputPrompt,
+        },
+      ],
+      temperature: 1,
+      top_p: 0.95,
+      // top_k: 64,
+      max_tokens: 8192,
     });
 
-    const generationConfig: GenerationConfig = {
-      temperature: 1,
-      topP: 0.95,
-      topK: 64,
-      maxOutputTokens: 8192,
-      responseMimeType: "text/plain",
-    };
+    const responseText = completion.choices[0]?.message?.content || "No response";
 
-    const chatSession = model.startChat({ generationConfig });
-
-    const result = await chatSession.sendMessage(InputPrompt);
-    const text = await result.response.text();
-
-    return NextResponse.json({ result: text });
+    return NextResponse.json({ result: responseText });
   } catch (error) {
     console.error("Error in Gemini API route:", error);
     return NextResponse.json({ error: "Failed to generate response" }, { status: 500 });

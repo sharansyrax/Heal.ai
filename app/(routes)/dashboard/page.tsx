@@ -81,25 +81,32 @@ const Page = async () => {
        
       </div>
       {/* Features Grid */}
-      <div className="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 rounded-lg">
-        {features.map((feature, idx) => (
-          <div
-            key={idx}
-            className="bg-purple-50 dark:bg-gray-900 shadow-md hover:shadow-xl transition overflow-hidden rounded-lg"
-          >
-            <img
-              src={feature.img}
-              alt={feature.title}
-              className="w-full h-100 object-cover bg-white p-2 rounded-lg"
-            />
-              <div className=" p-2 flex justify-center items-center">
-
-              <NextPage path={feature.path} titles={feature.title} />
-              </div>
-           
-          </div>
-        ))}
+      <div className="max-w-screen-lg mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+  {features.map((feature, idx) => (
+    <div
+      key={idx}
+      className="group bg-gradient-to-br from-purple-50 to-white dark:from-gray-800 dark:to-gray-900 shadow-lg hover:shadow-2xl transition duration-300 rounded-2xl overflow-hidden border border-purple-100 dark:border-gray-700"
+    >
+      {/* Image */}
+      <div className="overflow-hidden">
+        <img
+          src={feature.img}
+          alt={feature.title}
+          className="w-full h-56 object-cover transform group-hover:scale-105 transition duration-300"
+        />
       </div>
+
+      {/* Title / Link */}
+      <div className="flex justify-center items-center p-4">
+        <NextPage
+          path={feature.path}
+          titles={feature.title}
+        />
+      </div>
+    </div>
+  ))}
+</div>
+
 
     </div>
      </div>
