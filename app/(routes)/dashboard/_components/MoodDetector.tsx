@@ -87,12 +87,19 @@ const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,set
       setEmotion("No face/emotion detected")
     }
   }
-
-  const handleReset = (): void => {
-    setEmotion("")
-    setIsCaptured(false)
-    videoRef.current?.play()
+const handleReset = (): void => {
+  setEmotion("")
+  setIsCaptured(false)
+  
+  if (videoRef.current?.srcObject) {
+    // Stream exists, just resume playback
+    videoRef.current.play()
+  } else {
+    // Stream was stopped, restart the camera
+    startVideo()
   }
+}
+
 
   return (
     <div className="flex flex-col items-center mt-8 gap-4">
