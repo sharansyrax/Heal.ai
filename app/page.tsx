@@ -7,10 +7,15 @@ const HealAILanding = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loading,setLoading]=useState(false);
 
-    const router = useRouter();
+  const router = useRouter();
   const handleGetStarted=()=>{
-    router.push('/sign-up')
+    setLoading(true)
+    setTimeout(()=>{
+       router.push('/sign-up')
+    },1500)
+   
   }
 
   const features = [
@@ -77,27 +82,40 @@ const HealAILanding = () => {
     }
   ];
 
-  const faqs = [
-    {
-      question: "How accurate is the emotion detection?",
-      answer: "Our AI emotion detection uses advanced machine learning algorithms with 95%+ accuracy, trained on millions of emotional data points."
-    },
-    {
-      question: "Is my emotional data kept private?",
-      answer: "Absolutely. We use end-to-end encryption and never share your personal emotional data with third parties."
-    },
-    {
-      question: "Can Heal AI replace professional therapy?",
-      answer: "Heal AI complements professional mental health care. We encourage users to seek professional help when needed."
-    },
-    {
-      question: "What devices does Heal AI work on?",
-      answer: "Heal AI works seamlessly across all devices - desktop, tablet, and mobile with synchronized data."
-    }
-  ];
+  // const faqs = [
+  //   {
+  //     question: "How accurate is the emotion detection?",
+  //     answer: "Our AI emotion detection uses advanced machine learning algorithms with 95%+ accuracy, trained on millions of emotional data points."
+  //   },
+  //   {
+  //     question: "Is my emotional data kept private?",
+  //     answer: "Absolutely. We use end-to-end encryption and never share your personal emotional data with third parties."
+  //   },
+  //   {
+  //     question: "Can Heal AI replace professional therapy?",
+  //     answer: "Heal AI complements professional mental health care. We encourage users to seek professional help when needed."
+  //   },
+  //   {
+  //     question: "What devices does Heal AI work on?",
+  //     answer: "Heal AI works seamlessly across all devices - desktop, tablet, and mobile with synchronized data."
+  //   }
+  // ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+
+    <div>
+
+    {
+      loading ?
+      (
+        <div className="min-h-screen flex flex-col items-center justify-center">
+         <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-purple-500"></div>
+          <p className="mt-4 text-purple-600 font-medium">Loading...</p>
+        </div>
+        </div>
+      ):(
+           <div className="min-h-screen bg-gray-50 font-sans">
       {/* Navigation */}
       <nav className="bg-gradient-to-r from-white  to-purple-200  border-b border-purple-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -274,7 +292,7 @@ const HealAILanding = () => {
   
 
       {/* FAQ Section */}
-      <section className="py-20 bg-white">
+      {/* <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -301,7 +319,7 @@ const HealAILanding = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
    
       {/* Footer */}
@@ -355,6 +373,10 @@ const HealAILanding = () => {
         </div>
       </footer>
     </div>
+      )
+    }
+    </div>
+   
   );
 };
 

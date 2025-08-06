@@ -2,23 +2,19 @@
 import React, { useRef, useEffect, useState } from "react"
 import * as faceapi from "face-api.js"
 import { Button } from "@/components/ui/button"
+
 type Props = {
   emotion: string;
   setEmotion: (value: string) => void;
-   isCaptured: boolean;
-  setIsCaptured: (value: boolean) => void;
-    cameraOn: boolean;
-  setCameraOn: (value: boolean) => void;
-  disabled: boolean;
-  setDisabled: (value: boolean) => void;
-
 };
 
-
-const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,setCameraOn,disabled,setDisabled}:Props)=> {
+const SelfieEmotionDetector = ({ emotion, setEmotion }: Props) => {
   const videoRef = useRef<HTMLVideoElement | null>(null)
- 
- 
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const [cameraOn, setCameraOn] = useState(false)
+  const [selfie, setSelfie] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = "/models"
@@ -29,7 +25,6 @@ const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,set
         faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
       ])
     }
-
     loadModels()
     return () => stopVideo()
   }, [])
@@ -41,8 +36,8 @@ const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,set
         videoRef.current.srcObject = stream
         await videoRef.current.play()
         setCameraOn(true)
-        setIsCaptured(false)
         setEmotion("")
+        setSelfie(null)
       }
     } catch (err) {
       console.error("Error accessing camera:", err)
@@ -56,25 +51,27 @@ const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,set
       if (videoRef.current) videoRef.current.srcObject = null
     }
     setCameraOn(false)
-    setIsCaptured(false)
-    setEmotion("")
   }
 
-  const handleToggleCamera = (): void => {
-    cameraOn ? stopVideo() : startVideo()
-  }
+  const captureSelfie = async () => {
+    if (!videoRef.current || !canvasRef.current) return
+    setLoading(true)
 
+    const canvas = canvasRef.current
+    canvas.width = videoRef.current.videoWidth
+    canvas.height = videoRef.current.videoHeight
+    const ctx = canvas.getContext("2d")
+    ctx?.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
 
-  const handleCapture = async (): Promise<void> => {
-    setDisabled(!disabled)
-    const video = videoRef.current
-    if (!video) return
+    const imageData = canvas.toDataURL("image/png")
+    setSelfie(imageData)
 
-    video.pause()
-    setIsCaptured(true)
+    // Stop the video after capture
+    stopVideo()
 
+    // Detect emotion from the captured selfie
     const detections = await faceapi
-      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
       .withFaceExpressions()
 
@@ -86,72 +83,83 @@ const EmotionDetector=({emotion,setEmotion,isCaptured,setIsCaptured,cameraOn,set
     } else {
       setEmotion("No face/emotion detected")
     }
+
+    setLoading(false)
   }
-const handleReset = (): void => {
-  setEmotion("")
-  setIsCaptured(false)
-  
-  if (videoRef.current?.srcObject) {
-    // Stream exists, just resume playback
-    videoRef.current.play()
-  } else {
-    // Stream was stopped, restart the camera
+
+  const retakeSelfie = () => {
+    setSelfie(null)
+    setEmotion("")
     startVideo()
   }
-}
-
 
   return (
     <div className="flex flex-col items-center mt-8 gap-4">
-      {/* Video + Overlay */}
-      <div className="relative w-[520px] h-[360px]">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-full rounded-xl shadow z-10 relative"
-        />
-        {!cameraOn && (
-          <div className="absolute -z-10 top-0 left-0 w-full h-full pointer-events-none flex justify-center items-center bg-white/60 text-black font-semibold text-lg rounded-xl">
+      {/* Video or Selfie Display */}
+      <div className="relative   md:w-[520px] md:h-[360px] rounded-xl overflow-hidden shadow " >
+        {selfie ? (
+          <img src={selfie} alt="Selfie" className="w-full h-full object-cover" />
+        ) : (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full"
+          />
+        )}
+        {!cameraOn && !selfie && (
+          <div className="absolute inset-0 flex justify-center items-center bg-white/70 text-black font-semibold text-lg rounded-xl">
             Camera is OFF
           </div>
         )}
       </div>
 
-      {/* Camera Controls */}
-      <div className="flex flex-row justify-center items-center gap-2">
-            <Button onClick={handleToggleCamera}
-            disabled={disabled}
-            className="mt-2 bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600">
-        {cameraOn ? "Off Camera" : "Resume"}
-      </Button>
+      {/* Hidden Canvas for Capture */}
+      <canvas ref={canvasRef} className="hidden" />
 
-      {cameraOn && !isCaptured && (
-        <Button
-          onClick={handleCapture}
-          className="mt-2 bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700"
-        >
-          Capture Emotion
-        </Button>
-      )}
- {cameraOn && isCaptured && (
-        <Button
-          onClick={handleReset}
-          disabled={disabled}
-          className="mt-2 bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
-        >
-          Resume Video
-        </Button>
-      )}
+      {/* Buttons */}
+      <div className="flex gap-3 mt-3 flex-wrap justify-center">
+        {!cameraOn && !selfie && (
+          <Button
+            onClick={startVideo}
+            className="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600"
+          >
+            Start Camera
+          </Button>
+        )}
 
-        
+        {cameraOn && (
+          <>
+            <Button
+              onClick={captureSelfie}
+              className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700"
+            >
+              {loading ? "Processing..." : "Take Selfie"}
+            </Button>
+
+            <Button
+              onClick={stopVideo}
+              className="bg-purple-900 text-white px-6 py-2 rounded-lg hover:bg-purple-600"
+            >
+              Turn Off Camera
+            </Button>
+          </>
+        )}
+
+        {selfie && (
+          <Button
+            onClick={retakeSelfie}
+            className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600"
+          >
+            Retake Selfie
+          </Button>
+        )}
       </div>
-    
-     
+
       {/* Emotion Output */}
       {emotion && (
-        <div className="text-xl font-semibold text-purple-700">
+        <div className="text-xl font-semibold text-purple-700 mt-4">
           Detected Emotion: <span className="capitalize">{emotion}</span>
         </div>
       )}
@@ -159,5 +167,4 @@ const handleReset = (): void => {
   )
 }
 
-
-export default EmotionDetector 
+export default SelfieEmotionDetector
