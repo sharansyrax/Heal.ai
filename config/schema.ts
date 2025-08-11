@@ -8,9 +8,10 @@ export const users = pgTable("user", {
   password: varchar("password", { length: 255 }).notNull(),
 });
 export const usermood = pgTable("usermood", {
-  id: uuid("id").primaryKey().defaultRandom(), // optional
+  id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id),
   emotion: text("emotion").notNull(),
   thought: text("thought").notNull(),
   response: text("response").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(), // added time
 });
