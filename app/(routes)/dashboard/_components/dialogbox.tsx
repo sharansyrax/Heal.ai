@@ -1,4 +1,5 @@
-import React from 'react'
+"use client"
+import React, { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from '@/components/ui/button'
 import { DialogClose } from '@radix-ui/react-dialog'
 const Dialogbox = () => {
+
+  const [note,setNote]=useState<string>();
   return (
     <div>
         <Dialog>
@@ -24,7 +27,7 @@ const Dialogbox = () => {
                 <DialogDescription>
                    <div>
                     <h2>Add symptoms</h2>
-                    <Textarea placeholder='add details here...' className='h-[200px] mt-1'></Textarea>
+                    <Textarea onChange={(e)=>{setNote(e.target.value)}} placeholder='add details here...' className='h-[200px] mt-1'></Textarea>
                    </div>
                 </DialogDescription>
                 </DialogHeader>
@@ -33,7 +36,7 @@ const Dialogbox = () => {
 
                     <Button variant={'outline'}>cancel</Button>
                     </DialogClose>
-                    <Button>next</Button>
+                    <Button disabled={!note}>next</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
